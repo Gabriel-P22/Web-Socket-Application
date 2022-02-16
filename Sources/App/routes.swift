@@ -1,11 +1,24 @@
 import Vapor
 
 func routes(_ app: Application) throws {
-    app.get { req in
-        return "It works!"
-    }
-
-    app.get("hello") { req -> String in
-        return "Hello, world!"
+    app.webSocket("chat") {
+        request, ws in
+        
+        ws.send("Connected")
+        ws.onText {
+            ws, text in
+            ws.send("Text received: \(text)")
+            print("received from client: \(text)")
+        }
+        ws.onClose.whenComplete{ result in
+            switch result {
+            case .success():
+                print("Closed")
+                
+            case .failure(let error):
+                print("Error: \(error)")
+            }
+            
+        }
     }
 }
